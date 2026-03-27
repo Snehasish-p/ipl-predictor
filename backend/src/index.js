@@ -8,7 +8,7 @@ const selectionRoutes = require('./routes/selections');
 const standingsRoutes = require('./routes/standings');
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: 'https://ipl-predictor-plum.vercel.app' }));
 app.use(express.json());
 
 app.use('/api/auth',       authRoutes);
