@@ -4,8 +4,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./ipl.db"
+  provider = "postgresql"
+  url      = env("postgresql://ipl_database_6t6z_user:3rpBiv8DS6X5bhX3kiUXo0TUeLThobJQ@dpg-d73enqhr0fns73a9jnt0-a/ipl_database_6t6z")
 }
 
 model User {
