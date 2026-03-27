@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: 'http://localhost:3001/api' });
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL
+});
 
 // Attach JWT to every request automatically
 api.interceptors.request.use(config => {
