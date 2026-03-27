@@ -1,0 +1,92 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #0f1923;
+  color: #fff;
+  min-height: 100vh;
+}
+
+nav {
+  background: #1a2634;
+  padding: 1rem 2rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  border-bottom: 2px solid #f5a623;
+}
+
+nav a { color: #fff; text-decoration: none; font-weight: 500; }
+nav a:hover { color: #f5a623; }
+
+.page { max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
+
+.auth-container {
+  max-width: 400px;
+  margin: 5rem auto;
+  background: #1a2634;
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+.auth-container h2 { margin-bottom: 1.5rem; color: #f5a623; }
+
+input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background: #0f1923;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+}
+
+button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #f5a623;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover { background: #e09415; }
+button:disabled { background: #555; color: #888; cursor: not-allowed; }
+button.selected { background: #27ae60; color: white; }
+
+.match-card {
+  background: #1a2634;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-top: 1rem;
+}
+
+.match-card h3 { color: #f5a623; margin-bottom: 0.5rem; }
+.venue { color: #aaa; margin-bottom: 1.5rem; }
+
+.teams { display: flex; gap: 1rem; }
+.teams button { flex: 1; }
+
+.picked { margin-top: 1rem; color: #aaa; }
+
+.error { color: #e74c3c; margin: 0.5rem 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #1a2634;
+}
+
+th { background: #1a2634; color: #f5a623; }
+tr:hover { background: #1a2634; }
+tr.leader td { color: #f5a623; font-weight: bold; }
