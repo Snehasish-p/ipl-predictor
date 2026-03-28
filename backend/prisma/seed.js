@@ -3,6 +3,16 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
+  // Check if admin already exists — safe to run multiple times
+  const existing = await prisma.user.findUnique({
+    where: { email: 'admin@ipl.com' }
+  });
+
+  if (existing) {
+    console.log('✅ Admin already exists, skipping seed.');
+    return;
+  }
+
   const hashed = await bcrypt.hash('admin123', 10);
   await prisma.user.create({
     data: {
