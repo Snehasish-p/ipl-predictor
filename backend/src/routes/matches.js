@@ -78,4 +78,41 @@ router.patch('/:id/result', auth, async (req, res) => {
   }
 });
 
+// DELETE /api/matches/:id — Admin: delete a single match
+router.delete('/:id', auth, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'Admins only' });
+  const matchId = parseInt(req.params.id);
+
+  try {
+    // Delete selections for this match first (foreign key constraint)
+    await prisma.selection.deleteMany({ where: { matchId } });
+
+    await prisma.match.delete({ where: { id: matchId } });
+    res.json({ message: `Match ${matchId} deleted successfully` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete match' });
+  }
+});
+
+// DELETE /api/matches — Admin: delete ALL matches
+router.delete('/', auth, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'Admins only' });
+
+  try {
+    // Delete all selections first (foreign key constraint)
+    const deletedSelections = await prisma.selection.deleteMany({});
+    const deletedMatches    = await prisma.match.deleteMany({});
+
+    res.json({
+      message: 'All matches and selections deleted',
+      deletedMatches: deletedMatches.count,
+      deletedSelections: deletedSelections.count
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete matches' });
+  }
+});
+
 module.exports = router;
