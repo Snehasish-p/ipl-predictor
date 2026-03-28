@@ -47,4 +47,31 @@ router.get('/my', auth, async (req, res) => {
   res.json(selections);
 });
 
+// DELETE /api/selections/reset/:matchId — Admin only: reset all selections for a match
+router.delete('/reset/:matchId', auth, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'Admins only' });
+  
+  const matchId = parseInt(req.params.matchId);
+  
+  const deleted = await prisma.selection.deleteMany({
+    where: { matchId }
+  });
+  
+  res.json({ message: `Deleted ${deleted.count} selections for match ${matchId}` });
+});
+
+// DELETE /api/selections/reset-user/:matchId — Admin only: reset one user's selection
+router.delete('/reset-user/:matchId/:userId', auth, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'Admins only' });
+
+  const matchId = parseInt(req.params.matchId);
+  const userId  = parseInt(req.params.userId);
+
+  const deleted = await prisma.selection.deleteMany({
+    where: { matchId, userId }
+  });
+
+  res.json({ message: `Deleted ${deleted.count} selection(s) for user ${userId} on match ${matchId}` });
+});
+
 module.exports = router;
