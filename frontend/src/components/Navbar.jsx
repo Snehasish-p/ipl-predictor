@@ -1,9 +1,10 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -12,20 +13,23 @@ export default function Navbar() {
 
   if (!user) return null;
 
+  const isActive = (path) => location.pathname === path;
+
   return (
     <nav>
-      <span>🏏 IPL Predictor</span>
-      <Link to="/">Pick Team</Link>
-      <Link to="/results">Results</Link>
-      <Link to="/standings">Standings</Link>
-      <Link to="/points-table">Points Table</Link>
-      <span style={{ marginLeft: 'auto', color: '#aaa' }}>{user.name}</span>
-      <button
-        onClick={handleLogout}
-        style={{ width: 'auto', padding: '0.4rem 1rem', fontSize: '0.85rem' }}
-      >
-        Logout
-      </button>
+      <span className="nav-brand">🏏 IPL</span>
+
+      <Link to="/"              className={isActive('/')              ? 'active' : ''}>Pick Team</Link>
+      <Link to="/standings"     className={isActive('/standings')     ? 'active' : ''}>Standings</Link>
+      <Link to="/points-table"  className={isActive('/points-table')  ? 'active' : ''}>Points</Link>
+
+      <div className="nav-spacer" />
+
+      <div className="nav-user">
+        <div className="nav-avatar">{user.name?.[0]?.toUpperCase()}</div>
+        <span className="nav-username">{user.name}</span>
+        <button className="btn-logout" onClick={handleLogout}>Logout</button>
+      </div>
     </nav>
   );
 }
