@@ -10,18 +10,21 @@ router.post('/', auth, async (req, res) => {
   const { matchId, selectedTeam } = req.body;
   const userId = req.user.id;
 
-  // Check match exists and isn't complete
   const match = await prisma.match.findUnique({ where: { id: matchId } });
   if (!match) return res.status(404).json({ error: 'Match not found' });
   if (match.isComplete) return res.status(400).json({ error: 'Match already completed' });
 
-  // Validate team belongs to this match
+  // ⏰ Check if submission time has passed (match start time = cutoff)
+  const now = new Date();
+  if (now >= new Date(match.matchDate)) {
+    return res.status(400).json({ error: 'Selection time is over. Match has already started!' });
+  }
+
   if (selectedTeam !== match.team1 && selectedTeam !== match.team2) {
     return res.status(400).json({ error: 'Invalid team selection' });
   }
 
   try {
-    // @@unique([userId, matchId]) prevents duplicate selections at DB level
     const selection = await prisma.selection.create({
       data: { userId, matchId, selectedTeam }
     });

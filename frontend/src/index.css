@@ -1,92 +1,78 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #0f1923;
-  color: #fff;
-  min-height: 100vh;
-}
-
-nav {
-  background: #1a2634;
-  padding: 1rem 2rem;
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-  border-bottom: 2px solid #f5a623;
-}
-
-nav a { color: #fff; text-decoration: none; font-weight: 500; }
-nav a:hover { color: #f5a623; }
-
-.page { max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
-
-.auth-container {
-  max-width: 400px;
-  margin: 5rem auto;
-  background: #1a2634;
-  padding: 2rem;
-  border-radius: 12px;
-}
-
-.auth-container h2 { margin-bottom: 1.5rem; color: #f5a623; }
-
-input {
-  width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  background: #0f1923;
-  border: 1px solid #333;
+/* Countdown and time banners */
+.countdown-banner {
+  background: #1e3a5f;
+  border: 1px solid #3b82f6;
+  color: #93c5fd;
+  padding: 0.6rem 1rem;
   border-radius: 8px;
-  color: #fff;
-  font-size: 1rem;
+  margin: 0.75rem 0;
+  font-size: 0.95rem;
 }
 
-button {
-  width: 100%;
-  padding: 0.75rem;
-  background: #f5a623;
-  color: #000;
-  border: none;
+.time-over-banner {
+  background: #3b1a1a;
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  padding: 0.6rem 1rem;
   border-radius: 8px;
+  margin: 0.75rem 0;
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+.match-time {
+  color: #aaa;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.pick-hint {
+  color: #aaa;
+  font-size: 0.85rem;
+  margin: 1rem 0 0.5rem;
+}
+
+/* Submit button — distinct from team buttons */
+.submit-btn {
+  margin-top: 1.25rem;
+  background: #16a34a;
+  color: white;
   font-size: 1rem;
   font-weight: bold;
-  cursor: pointer;
-}
-
-button:hover { background: #e09415; }
-button:disabled { background: #555; color: #888; cursor: not-allowed; }
-button.selected { background: #27ae60; color: white; }
-
-.match-card {
-  background: #1a2634;
-  border-radius: 12px;
-  padding: 2rem;
-  margin-top: 1rem;
-}
-
-.match-card h3 { color: #f5a623; margin-bottom: 0.5rem; }
-.venue { color: #aaa; margin-bottom: 1.5rem; }
-
-.teams { display: flex; gap: 1rem; }
-.teams button { flex: 1; }
-
-.picked { margin-top: 1rem; color: #aaa; }
-
-.error { color: #e74c3c; margin: 0.5rem 0; }
-
-table {
+  border-radius: 8px;
+  padding: 0.75rem;
   width: 100%;
-  border-collapse: collapse;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) { background: #15803d; }
+.submit-btn:disabled {
+  background: #374151;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* Dimmed unselected team after submission */
+button.dimmed {
+  background: #2d3748;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.status-success {
   margin-top: 1rem;
+  color: #4ade80;
+  font-weight: 500;
 }
 
-th, td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid #1a2634;
+.status-error {
+  margin-top: 1rem;
+  color: #f87171;
+  font-weight: 500;
 }
 
-th { background: #1a2634; color: #f5a623; }
-tr:hover { background: #1a2634; }
-tr.leader td { color: #f5a623; font-weight: bold; }
+.submitted-view {
+  margin-top: 0.5rem;
+}

@@ -45,13 +45,11 @@ router.patch('/:id/result', auth, async (req, res) => {
   const matchId = parseInt(req.params.id);
 
   try {
-    // 1. Update match result
     const match = await prisma.match.update({
       where: { id: matchId },
       data: { winnerTeam, isComplete: true },
     });
 
-    // 2. Mark selections correct/incorrect
     await prisma.selection.updateMany({
       where: { matchId, selectedTeam: winnerTeam },
       data: { isCorrect: true },
@@ -61,14 +59,11 @@ router.patch('/:id/result', auth, async (req, res) => {
       data: { isCorrect: false },
     });
 
-    // 3. Get all selections for payout
     const selections = await prisma.selection.findMany({ where: { matchId } });
     const winners = selections.filter(s => s.selectedTeam === winnerTeam);
-
     const totalPool = 2000;
     const share = winners.length > 0 ? totalPool / winners.length : 0;
 
-    // 4. Update user points
     for (const w of winners) {
       await prisma.user.update({
         where: { id: w.userId },
@@ -80,25 +75,6 @@ router.patch('/:id/result', auth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to update result and points' });
-  }
-});
-
-// GET /api/users — Get all users with their points
-router.get('/users', auth, async (req, res) => {
-  try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        points: true,
-      },
-      orderBy: { points: 'desc' }
-    });
-    res.json(users);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch users' });
   }
 });
 
