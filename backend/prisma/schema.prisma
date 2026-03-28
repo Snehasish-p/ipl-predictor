@@ -1,11 +1,10 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("postgresql://ipl_database_6t6z_user:3rpBiv8DS6X5bhX3kiUXo0TUeLThobJQ@dpg-d73enqhr0fns73a9jnt0-a/ipl_database_6t6z")
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -15,6 +14,7 @@ model User {
   mobile     String?     @unique
   password   String
   isAdmin    Boolean     @default(false)
+  points     Float       @default(0)
   createdAt  DateTime    @default(now())
   selections Selection[]
 }
