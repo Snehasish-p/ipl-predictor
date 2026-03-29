@@ -16,6 +16,7 @@ export default function Navbar() {
       <span className="nav-brand">🏏 IPL</span>
       <Link to="/"             className={isActive('/')             ? 'active' : ''}>Today</Link>
       <Link to="/matches"      className={isActive('/matches')      ? 'active' : ''}>Matches</Link>
+      <Link to="/selections" className={isActive('/selections') ? 'active' : ''}>Picks</Link>
       <Link to="/standings"    className={isActive('/standings')    ? 'active' : ''}>Standings</Link>
       <Link to="/points-table" className={isActive('/points-table') ? 'active' : ''}>Points</Link>
       <div className="nav-spacer" />

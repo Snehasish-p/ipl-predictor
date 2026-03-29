@@ -133,4 +133,44 @@ router.delete('/', auth, async (req, res) => {
   }
 });
 
+// GET /api/matches/selections-overview — All matches with all users' selections
+router.get('/selections-overview', auth, async (req, res) => {
+  try {
+    const matches = await prisma.match.findMany({
+      orderBy: { matchDate: 'asc' },
+      include: {
+        selections: {
+          include: {
+            user: {
+              select: { id: true, name: true }
+            }
+          }
+        }
+      }
+    });
+
+    // Only return matches that have at least one selection OR are complete
+    const result = matches.map(match => ({
+      id:         match.id,
+      matchDate:  match.matchDate,
+      team1:      match.team1,
+      team2:      match.team2,
+      venue:      match.venue,
+      winnerTeam: match.winnerTeam,
+      isComplete: match.isComplete,
+      selections: match.selections.map(s => ({
+        userId:       s.user.id,
+        userName:     s.user.name,
+        selectedTeam: s.selectedTeam,
+        isCorrect:    s.isCorrect
+      }))
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch selections overview' });
+  }
+});
+
 module.exports = router;

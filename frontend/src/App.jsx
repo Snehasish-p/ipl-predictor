@@ -7,6 +7,7 @@ import Home        from './pages/Home';
 import Matches     from './pages/Matches';
 import Standings   from './pages/Standings';
 import PointsTable from './pages/PointsTable';
+import SelectionsOverview from './pages/SelectionsOverview';
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/register"     element={<Register />} />
           <Route path="/"             element={<PrivateRoute><Home /></PrivateRoute>} />
           <Route path="/matches"      element={<PrivateRoute><Matches /></PrivateRoute>} />
+          <Route path="/selections" element={<PrivateRoute><SelectionsOverview /></PrivateRoute>} />
           <Route path="/standings"    element={<PrivateRoute><Standings /></PrivateRoute>} />
           <Route path="/points-table" element={<PrivateRoute><PointsTable /></PrivateRoute>} />
         </Routes>

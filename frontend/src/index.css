@@ -1118,3 +1118,230 @@ button {
 }
 
 .legend-green { background: var(--green); }
+
+
+/* ─── SELECTIONS OVERVIEW PAGE ─── */
+.filter-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: auto;
+}
+
+.filter-tab:hover { border-color: var(--border-accent); color: var(--text-primary); }
+
+.filter-tab.active {
+  background: rgba(245,166,35,0.1);
+  border-color: rgba(245,166,35,0.4);
+  color: var(--gold);
+}
+
+.sel-summary {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}
+
+/* Match card */
+.sel-match-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.sel-match-card:hover { border-color: var(--border-accent); }
+
+.sel-match-header {
+  background: rgba(245,166,35,0.04);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.sel-match-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sel-match-number {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 1.5px;
+  color: var(--gold);
+  background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.2);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.sel-teams-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sel-match-date {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.sel-match-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.sel-count-badge {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+}
+
+/* Split bar */
+.split-bar-container {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.split-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: var(--text-secondary);
+}
+
+.split-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-secondary);
+  display: flex;
+  overflow: hidden;
+  gap: 2px;
+}
+
+.split-bar-fill { height: 100%; transition: width 0.5s ease; }
+.team1-fill { background: linear-gradient(90deg, var(--gold-dark), var(--gold)); border-radius: 999px 0 0 999px; }
+.team2-fill { background: linear-gradient(90deg, var(--blue-accent), #60a5fa); border-radius: 0 999px 999px 0; }
+
+.split-bar-counts {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+}
+
+/* Selections table */
+.sel-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sel-table thead th {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0.6rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.sel-table tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background 0.15s;
+}
+
+.sel-table tbody tr:last-child { border-bottom: none; }
+.sel-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+.sel-table tbody td {
+  padding: 0.75rem 1.5rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.sel-row-correct { background: rgba(34,197,94,0.03) !important; }
+.sel-row-wrong   { background: rgba(239,68,68,0.03) !important; }
+
+.sel-rank {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  color: var(--text-muted);
+  width: 40px;
+}
+
+/* Team badge */
+.team-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.team-badge-winner {
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.3);
+  color: var(--green);
+}
+
+.team-badge-loser {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: var(--red);
+  opacity: 0.7;
+}
+
+.team-badge-neutral {
+  background: rgba(245,166,35,0.08);
+  border: 1px solid rgba(245,166,35,0.2);
+  color: var(--gold);
+}
