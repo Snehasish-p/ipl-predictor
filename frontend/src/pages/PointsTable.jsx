@@ -34,6 +34,7 @@ export default function PointsTable() {
 
   const totalPool      = 2000;
   const investPerMatch = 200;
+  const totalMatches   = users[0]?.totalMatches || 0;
 
   return (
     <div className="page">
@@ -53,15 +54,15 @@ export default function PointsTable() {
           <p className="info-card-value">₹{investPerMatch}</p>
         </div>
         <div className="info-card">
-          <p className="info-card-label">Participants</p>
-          <p className="info-card-value">{users.length}</p>
+          <p className="info-card-label">Matches Played</p>
+          <p className="info-card-value">{totalMatches}</p>
         </div>
       </div>
 
       {users.length === 0 ? (
         <div className="empty-state animate-in-delay">
           <div className="empty-icon">💰</div>
-          <h3>No points yet</h3>
+          <h3>No data yet</h3>
           <p>Points will appear once match results are updated</p>
         </div>
       ) : (
@@ -71,8 +72,9 @@ export default function PointsTable() {
               <tr>
                 <th style={{ width: 50 }}>#</th>
                 <th>Participant</th>
-                <th style={{ textAlign: 'right' }}>Matches</th>
-                <th style={{ textAlign: 'right' }}>Points Earned</th>
+                <th style={{ textAlign: 'right' }}>Selected</th>
+                <th style={{ textAlign: 'right' }}>Missed</th>
+                <th style={{ textAlign: 'right' }}>Points</th>
                 <th style={{ textAlign: 'right' }}>Net Profit</th>
               </tr>
             </thead>
@@ -83,7 +85,10 @@ export default function PointsTable() {
                   <td style={{
                     fontFamily: 'Bebas Neue',
                     fontSize: '1.2rem',
-                    color: i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : i === 2 ? '#cd7c2e' : 'var(--text-muted)'
+                    color: i === 0 ? '#fbbf24'
+                         : i === 1 ? '#94a3b8'
+                         : i === 2 ? '#cd7c2e'
+                         : 'var(--text-muted)'
                   }}>
                     {i < 3 ? RANK_MEDALS[i] : i + 1}
                   </td>
@@ -98,14 +103,24 @@ export default function PointsTable() {
                     </div>
                   </td>
 
-                  {/* Matches played */}
+                  {/* Matches selected */}
                   <td style={{
                     textAlign: 'right',
                     fontFamily: 'Rajdhani',
                     fontWeight: 600,
-                    color: 'var(--text-muted)'
+                    color: 'var(--green)'
                   }}>
                     {u.matchesPlayed}
+                  </td>
+
+                  {/* Matches missed */}
+                  <td style={{
+                    textAlign: 'right',
+                    fontFamily: 'Rajdhani',
+                    fontWeight: 600,
+                    color: u.matchesMissed > 0 ? 'var(--red)' : 'var(--text-muted)'
+                  }}>
+                    {u.matchesMissed > 0 ? `${u.matchesMissed} ⚠` : '0'}
                   </td>
 
                   {/* Points earned */}
@@ -116,7 +131,7 @@ export default function PointsTable() {
                     fontSize: '1.05rem',
                     color: 'var(--gold)'
                   }}>
-                    ₹{Number(u.points || 0).toFixed(0)}
+                    ₹{Number(u.points).toFixed(0)}
                   </td>
 
                   {/* Net profit */}
@@ -125,11 +140,9 @@ export default function PointsTable() {
                     fontFamily: 'Rajdhani',
                     fontWeight: 700,
                     fontSize: '1.05rem',
-                    color: u.profit > 0
-                      ? 'var(--green)'
-                      : u.profit < 0
-                      ? 'var(--red)'
-                      : 'var(--text-muted)'
+                    color: u.profit > 0 ? 'var(--green)'
+                         : u.profit < 0 ? 'var(--red)'
+                         : 'var(--text-muted)'
                   }}>
                     {u.profit > 0 ? '+' : ''}₹{Number(u.profit).toFixed(0)}
                   </td>
@@ -139,10 +152,13 @@ export default function PointsTable() {
           </table>
 
           {/* Legend */}
-          <div className="profit-legend">
+          <div className="profit-legend" style={{ marginTop: '1rem' }}>
             <span className="legend-item">
               <span className="legend-dot legend-green" />
-              Profit = Points Earned − (₹{investPerMatch} × Matches Played)
+              Profit = Points Earned − (₹{investPerMatch} × Completed Matches)
+            </span>
+            <span className="legend-item" style={{ color: 'var(--red)' }}>
+              ⚠ Missed = No selection made before cutoff (-₹{investPerMatch} penalty)
             </span>
           </div>
         </div>
