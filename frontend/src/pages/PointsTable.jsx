@@ -4,9 +4,9 @@ import api from '../api/api';
 const RANK_MEDALS = ['🥇', '🥈', '🥉'];
 
 export default function PointsTable() {
-  const [users, setUsers]   = useState([]);
+  const [users, setUsers]     = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError]   = useState('');
+  const [error, setError]     = useState('');
 
   useEffect(() => {
     api.get('/users')
@@ -32,55 +32,54 @@ export default function PointsTable() {
     </div>
   );
 
-  const totalPool = 2000;
+  const totalPool      = 2000;
+  const investPerMatch = 200;
 
   return (
     <div className="page">
       <div className="animate-in">
         <p className="page-title">Points Table</p>
-        <p className="page-subtitle">Season earnings from correct predictions</p>
+        <p className="page-subtitle">Season earnings and net profit</p>
+      </div>
+
+      {/* Info cards */}
+      <div className="info-cards animate-in">
+        <div className="info-card">
+          <p className="info-card-label">Prize Pool / Match</p>
+          <p className="info-card-value">₹{totalPool.toLocaleString()}</p>
+        </div>
+        <div className="info-card">
+          <p className="info-card-label">Investment / Match</p>
+          <p className="info-card-value">₹{investPerMatch}</p>
+        </div>
+        <div className="info-card">
+          <p className="info-card-label">Participants</p>
+          <p className="info-card-value">{users.length}</p>
+        </div>
       </div>
 
       {users.length === 0 ? (
         <div className="empty-state animate-in-delay">
           <div className="empty-icon">💰</div>
           <h3>No points yet</h3>
-          <p>Points will be awarded once match results are updated</p>
+          <p>Points will appear once match results are updated</p>
         </div>
       ) : (
         <div className="animate-in-delay">
-
-          {/* Pool info card */}
-          <div className="card" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <p style={{ fontFamily: 'Rajdhani', fontSize: '0.8rem', letterSpacing: '1px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
-                Daily Prize Pool
-              </p>
-              <p style={{ fontFamily: 'Bebas Neue', fontSize: '2rem', letterSpacing: '2px', color: 'var(--gold)', lineHeight: 1 }}>
-                ₹{totalPool.toLocaleString()}
-              </p>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <p style={{ fontFamily: 'Rajdhani', fontSize: '0.8rem', letterSpacing: '1px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
-                Participants
-              </p>
-              <p style={{ fontFamily: 'Bebas Neue', fontSize: '2rem', letterSpacing: '2px', color: 'var(--text-primary)', lineHeight: 1 }}>
-                {users.length}
-              </p>
-            </div>
-          </div>
-
           <table className="points-table">
             <thead>
               <tr>
                 <th style={{ width: 50 }}>#</th>
                 <th>Participant</th>
+                <th style={{ textAlign: 'right' }}>Matches</th>
                 <th style={{ textAlign: 'right' }}>Points Earned</th>
+                <th style={{ textAlign: 'right' }}>Net Profit</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u, i) => (
                 <tr key={u.id}>
+                  {/* Rank */}
                   <td style={{
                     fontFamily: 'Bebas Neue',
                     fontSize: '1.2rem',
@@ -88,6 +87,8 @@ export default function PointsTable() {
                   }}>
                     {i < 3 ? RANK_MEDALS[i] : i + 1}
                   </td>
+
+                  {/* Name */}
                   <td>
                     <div className="name-cell">
                       <div className="user-avatar-sm">
@@ -96,11 +97,54 @@ export default function PointsTable() {
                       {u.name}
                     </div>
                   </td>
-                  <td>₹{Number(u.points || 0).toFixed(0)}</td>
+
+                  {/* Matches played */}
+                  <td style={{
+                    textAlign: 'right',
+                    fontFamily: 'Rajdhani',
+                    fontWeight: 600,
+                    color: 'var(--text-muted)'
+                  }}>
+                    {u.matchesPlayed}
+                  </td>
+
+                  {/* Points earned */}
+                  <td style={{
+                    textAlign: 'right',
+                    fontFamily: 'Rajdhani',
+                    fontWeight: 700,
+                    fontSize: '1.05rem',
+                    color: 'var(--gold)'
+                  }}>
+                    ₹{Number(u.points || 0).toFixed(0)}
+                  </td>
+
+                  {/* Net profit */}
+                  <td style={{
+                    textAlign: 'right',
+                    fontFamily: 'Rajdhani',
+                    fontWeight: 700,
+                    fontSize: '1.05rem',
+                    color: u.profit > 0
+                      ? 'var(--green)'
+                      : u.profit < 0
+                      ? 'var(--red)'
+                      : 'var(--text-muted)'
+                  }}>
+                    {u.profit > 0 ? '+' : ''}₹{Number(u.profit).toFixed(0)}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
+          {/* Legend */}
+          <div className="profit-legend">
+            <span className="legend-item">
+              <span className="legend-dot legend-green" />
+              Profit = Points Earned − (₹{investPerMatch} × Matches Played)
+            </span>
+          </div>
         </div>
       )}
     </div>
