@@ -1,11 +1,11 @@
-const express  = require('express');
+const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// POST /api/selections — User picks a team for today's match
+// POST /api/selections
 router.post('/', auth, async (req, res) => {
   const { matchId, selectedTeam } = req.body;
   const userId = req.user.id;
@@ -14,7 +14,7 @@ router.post('/', auth, async (req, res) => {
   if (!match) return res.status(404).json({ error: 'Match not found' });
   if (match.isComplete) return res.status(400).json({ error: 'Match already completed' });
 
-  // ⏰ Check if submission time has passed (match start time = cutoff)
+  // Block selection if match has already started
   const now = new Date();
   if (now >= new Date(match.matchDate)) {
     return res.status(400).json({ error: 'Selection time is over. Match has already started!' });
@@ -37,7 +37,7 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// GET /api/selections/my — Get current user's selections
+// GET /api/selections/my
 router.get('/my', auth, async (req, res) => {
   const selections = await prisma.selection.findMany({
     where: { userId: req.user.id },
@@ -47,31 +47,28 @@ router.get('/my', auth, async (req, res) => {
   res.json(selections);
 });
 
-// DELETE /api/selections/reset/:matchId — Admin only: reset all selections for a match
+// DELETE /api/selections/reset/:matchId — Admin
 router.delete('/reset/:matchId', auth, async (req, res) => {
   if (!req.user.isAdmin) return res.status(403).json({ error: 'Admins only' });
-  
   const matchId = parseInt(req.params.matchId);
-  
-  const deleted = await prisma.selection.deleteMany({
-    where: { matchId }
-  });
-  
-  res.json({ message: `Deleted ${deleted.count} selections for match ${matchId}` });
+  const deleted = await prisma.selection.deleteMany({ where: { matchId } });
+  res.json({ message: `Deleted ${deleted.count} selections` });
 });
 
-// DELETE /api/selections/reset-user/:matchId — Admin only: reset one user's selection
+// DELETE /api/selections/reset-user/:matchId/:userId — Admin
 router.delete('/reset-user/:matchId/:userId', auth, async (req, res) => {
   if (!req.user.isAdmin) return res.status(403).json({ error: 'Admins only' });
-
   const matchId = parseInt(req.params.matchId);
   const userId  = parseInt(req.params.userId);
+  const deleted = await prisma.selection.deleteMany({ where: { matchId, userId } });
+  res.json({ message: `Deleted ${deleted.count} selection(s)` });
+});
 
-  const deleted = await prisma.selection.deleteMany({
-    where: { matchId, userId }
-  });
-
-  res.json({ message: `Deleted ${deleted.count} selection(s) for user ${userId} on match ${matchId}` });
+// DELETE /api/selections/reset-all — Admin
+router.delete('/reset-all', auth, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'Admins only' });
+  const deleted = await prisma.selection.deleteMany({});
+  res.json({ message: `Deleted all ${deleted.count} selections` });
 });
 
 module.exports = router;

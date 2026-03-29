@@ -854,3 +854,201 @@ button {
   opacity: 0;
   animation: fadeUp 0.4s ease 0.15s forwards;
 }
+
+
+
+/* ─── MATCHES PAGE ─── */
+.matches-section { margin-bottom: 2rem; }
+
+.section-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.section-label-live     { background: rgba(239,68,68,0.1);   color: #fca5a5; border: 1px solid rgba(239,68,68,0.25); }
+.section-label-upcoming { background: rgba(59,130,246,0.1);  color: #93c5fd; border: 1px solid rgba(59,130,246,0.25); }
+.section-label-done     { background: rgba(34,197,94,0.1);   color: #86efac; border: 1px solid rgba(34,197,94,0.25); }
+
+.match-list-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.match-list-card:hover { border-color: var(--border-accent); }
+
+.match-today {
+  border-color: rgba(245,166,35,0.3);
+  box-shadow: 0 0 20px rgba(245,166,35,0.06);
+}
+
+.match-completed { opacity: 0.75; }
+.match-completed:hover { opacity: 1; }
+
+.match-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.match-list-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.match-list-date {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.match-list-venue {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.today-pill {
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  color: #000;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.live-pill {
+  background: rgba(239,68,68,0.1);
+  color: #fca5a5;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(239,68,68,0.3);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.winner-pill {
+  background: rgba(245,166,35,0.1);
+  color: var(--gold);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(245,166,35,0.25);
+}
+
+/* Team buttons for list view */
+.match-list-teams {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.team-list-btn {
+  width: 100%;
+  padding: 0.9rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.team-list-btn:hover:not(:disabled) {
+  border-color: rgba(245,166,35,0.4);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.team-list-btn.selected {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  color: #000;
+  box-shadow: 0 0 16px rgba(245,166,35,0.2);
+}
+
+.team-list-btn.dimmed  { opacity: 0.35; cursor: not-allowed; }
+.team-list-btn.winner  { border-color: var(--green); background: rgba(34,197,94,0.08); color: var(--green); }
+.team-list-btn.loser   { opacity: 0.3; cursor: not-allowed; }
+
+/* Footer row */
+.match-list-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 0.9rem;
+}
+
+.selection-locked {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.selection-locked strong { color: var(--text-primary); }
+
+.btn-submit-sm {
+  width: 100%;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(34,197,94,0.2);
+}
+
+.btn-submit-sm:hover:not(:disabled) {
+  background: linear-gradient(135deg, #15803d, #16a34a);
+  transform: translateY(-1px);
+}
+
+.btn-submit-sm:disabled {
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
