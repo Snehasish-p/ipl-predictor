@@ -63,4 +63,25 @@ router.patch('/reset-points', auth, async (req, res) => {
   }
 });
 
+router.delete('/reset-all', auth, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'Admins only' });
+
+  try {
+    await prisma.selection.deleteMany({});
+    await prisma.match.deleteMany({});
+    await prisma.user.deleteMany({ where: { isAdmin: false } });
+
+    // ← Also reset admin points to 0
+    await prisma.user.updateMany({
+      where: { isAdmin: true },
+      data: { points: 0 }
+    });
+
+    res.json({ message: '✅ All users, matches, selections deleted. Admin points reset to 0.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Reset failed' });
+  }
+});
+
 module.exports = router;
