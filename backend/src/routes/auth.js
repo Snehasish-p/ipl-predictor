@@ -66,4 +66,23 @@ router.post('/login', async (req, res) => {
   res.json({ token, user: { id: user.id, name: user.name, isAdmin: user.isAdmin } });
 });
 
+// DELETE /api/auth/reset-all — Admin: wipe all users, matches, selections
+router.delete('/reset-all', auth, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'Admins only' });
+
+  try {
+    // Delete in correct order (foreign keys)
+    await prisma.selection.deleteMany({});
+    await prisma.match.deleteMany({});
+    await prisma.user.deleteMany({
+      where: { isAdmin: false } // Keep the admin user!
+    });
+
+    res.json({ message: '✅ All test users, matches and selections deleted. Admin account kept.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Reset failed' });
+  }
+});
+
 module.exports = router;
