@@ -48,4 +48,19 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// PATCH /api/users/reset-points — Admin: reset ALL users' points to 0
+router.patch('/reset-points', auth, async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ error: 'Admins only' });
+
+  try {
+    await prisma.user.updateMany({
+      data: { points: 0 }
+    });
+    res.json({ message: '✅ All user points reset to 0' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to reset points' });
+  }
+});
+
 module.exports = router;
