@@ -7,29 +7,44 @@ export default function Home() {
   const [match, setMatch]               = useState(null);
   const [mySelections, setMySelections] = useState([]);
   const [pendingTeam, setPendingTeam]   = useState(null);
+  const [isEditing, setIsEditing]       = useState(false);
   const [status, setStatus]             = useState('');
   const [loading, setLoading]           = useState(true);
   const [timeLeft, setTimeLeft]         = useState('');
   const [isTimeUp, setIsTimeUp]         = useState(false);
 
   useEffect(() => {
-    Promise.all([api.get('/matches/today'), api.get('/selections/my')])
-      .then(([matchRes, selRes]) => {
-        setMatch(matchRes.data);
-        setMySelections(selRes.data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    fetchData();
   }, []);
 
-  // ⏱️ Live countdown
+  const fetchData = async () => {
+    try {
+      const [matchRes, selRes] = await Promise.all([
+        api.get('/matches/today'),
+        api.get('/selections/my')
+      ]);
+      setMatch(matchRes.data);
+      setMySelections(selRes.data);
+    } catch {
+      // No match today is fine
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Live countdown
   useEffect(() => {
     if (!match) return;
     const matchTime = new Date(match.matchDate).getTime();
 
     const tick = () => {
       const diff = matchTime - Date.now();
-      if (diff <= 0) { setIsTimeUp(true); setTimeLeft(''); return; }
+      if (diff <= 0) {
+        setIsTimeUp(true);
+        setTimeLeft('');
+        setIsEditing(false); // cancel editing if time runs out
+        return;
+      }
       setIsTimeUp(false);
       const h = Math.floor(diff / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
@@ -42,25 +57,61 @@ export default function Home() {
     return () => clearInterval(id);
   }, [match]);
 
-  const todaySelection  = match ? mySelections.find(s => s.matchId === match.id) : null;
+  const todaySelection   = match ? mySelections.find(s => s.matchId === match.id) : null;
   const alreadySubmitted = !!todaySelection;
+  const canEdit          = alreadySubmitted && !isTimeUp && !match?.isComplete;
 
+  // Toggle pending team selection
   const handleTeamClick = (team) => {
-    if (alreadySubmitted || isTimeUp) return;
+    if (isTimeUp) return;
+    if (!isEditing && alreadySubmitted) return;
     setPendingTeam(prev => prev === team ? null : team);
     setStatus('');
   };
 
+  // Enter edit mode
+  const handleEditClick = () => {
+    setIsEditing(true);
+    setPendingTeam(todaySelection.selectedTeam); // pre-select current choice
+    setStatus('');
+  };
+
+  // Cancel edit mode
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setPendingTeam(null);
+    setStatus('');
+  };
+
+  // Submit new selection
   const handleSubmit = async () => {
     if (!pendingTeam) { setStatus('⚠ Please select a team first.'); return; }
     try {
       await api.post('/selections', { matchId: match.id, selectedTeam: pendingTeam });
-      setStatus(`Your pick is locked in!`);
-      const { data } = await api.get('/selections/my');
-      setMySelections(data);
+      setStatus('Your pick is locked in!');
+      setIsEditing(false);
       setPendingTeam(null);
+      await fetchData();
     } catch (err) {
-      setStatus(err.response?.data?.error || 'Submission failed. Try again.');
+      setStatus(err.response?.data?.error || 'Submission failed.');
+    }
+  };
+
+  // Update existing selection
+  const handleUpdate = async () => {
+    if (!pendingTeam) { setStatus('⚠ Please select a team first.'); return; }
+    if (pendingTeam === todaySelection?.selectedTeam) {
+      setStatus('⚠ You selected the same team. No change needed.');
+      return;
+    }
+    try {
+      await api.patch(`/selections/${match.id}`, { selectedTeam: pendingTeam });
+      setStatus(`Selection updated to ${pendingTeam}!`);
+      setIsEditing(false);
+      setPendingTeam(null);
+      await fetchData();
+    } catch (err) {
+      setStatus(err.response?.data?.error || 'Update failed.');
     }
   };
 
@@ -74,14 +125,23 @@ export default function Home() {
   const matchDateStr = match
     ? new Date(match.matchDate).toLocaleString('en-IN', {
         timeZone: 'Asia/Kolkata',
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
+        weekday: 'short', day: 'numeric', month: 'short',
+        hour: '2-digit', minute: '2-digit', hour12: true
       })
     : '';
+
+  // What teams to highlight in the UI
+  const getTeamClass = (team) => {
+    if (isEditing || (!alreadySubmitted && !isTimeUp)) {
+      // Selection mode
+      return pendingTeam === team ? 'selected' : '';
+    }
+    if (alreadySubmitted) {
+      // Locked view
+      return todaySelection.selectedTeam === team ? 'selected' : 'dimmed';
+    }
+    return '';
+  };
 
   return (
     <div className="page">
@@ -114,51 +174,64 @@ export default function Home() {
               <span className="match-time-value">🕐 {matchDateStr} IST</span>
             </div>
 
-            {/* Time status banners */}
-            {!alreadySubmitted && (
-              isTimeUp ? (
-                <div className="banner banner-timeover">
-                  ⛔ <span>Selection closed — match has already started</span>
-                </div>
-              ) : (
-                <div className="banner banner-countdown">
-                  ⏱ <span>Time left to pick: <strong>{timeLeft}</strong></span>
-                </div>
-              )
+            {/* Status banners */}
+            {!alreadySubmitted && !isTimeUp && (
+              <div className="banner banner-countdown">
+                ⏱ <span>Time left to pick: <strong>{timeLeft}</strong></span>
+              </div>
             )}
 
-            {alreadySubmitted && (
+            {!alreadySubmitted && isTimeUp && (
+              <div className="banner banner-timeover">
+                ⛔ <span>Selection closed — match has already started</span>
+              </div>
+            )}
+
+            {alreadySubmitted && !isEditing && !isTimeUp && !match.isComplete && (
+              <div className="banner banner-locked" style={{ justifyContent: 'space-between' }}>
+                <span>🔒 Locked in — <strong>{todaySelection.selectedTeam}</strong> &nbsp;·&nbsp; <span style={{ fontWeight: 400 }}>Time left: {timeLeft}</span></span>
+                <button
+                  onClick={handleEditClick}
+                  className="btn-edit"
+                >
+                  ✏️ Edit Pick
+                </button>
+              </div>
+            )}
+
+            {alreadySubmitted && isEditing && (
+              <div className="banner banner-editing">
+                ✏️ <span>Edit mode — select a new team below and confirm</span>
+              </div>
+            )}
+
+            {alreadySubmitted && isTimeUp && (
               <div className="banner banner-locked">
                 🔒 <span>Your prediction is locked in for this match</span>
               </div>
             )}
 
-            {/* Hint */}
-            {!alreadySubmitted && !isTimeUp && (
+            {/* Pick hint */}
+            {(!alreadySubmitted || isEditing) && !isTimeUp && (
               <p className="pick-hint">
-                Select your predicted winner — tap again to change
+                {isEditing
+                  ? `Currently: ${todaySelection?.selectedTeam} — select a new team to change`
+                  : 'Select your predicted winner — tap again to deselect'}
               </p>
             )}
 
-            {/* Team selector */}
+            {/* Team buttons */}
             <div className="vs-row">
               {/* Team 1 */}
               <button
-                className={`team-btn ${
-                  alreadySubmitted
-                    ? todaySelection.selectedTeam === match.team1
-                      ? 'selected'
-                      : 'dimmed'
-                    : pendingTeam === match.team1
-                    ? 'selected'
-                    : ''
-                } ${match.winnerTeam === match.team1 ? 'winner' : ''}`}
+                className={`team-btn ${getTeamClass(match.team1)} ${match.winnerTeam === match.team1 ? 'winner' : ''}`}
                 onClick={() => handleTeamClick(match.team1)}
-                disabled={alreadySubmitted || isTimeUp}
+                disabled={(alreadySubmitted && !isEditing) || isTimeUp}
               >
-                {(alreadySubmitted
-                  ? todaySelection.selectedTeam === match.team1
-                  : pendingTeam === match.team1) && (
+                {((isEditing || !alreadySubmitted) && pendingTeam === match.team1) && (
+                  <span className="team-check">✓</span>
+                )}
+                {alreadySubmitted && !isEditing && todaySelection.selectedTeam === match.team1 && (
                   <span className="team-check">✓</span>
                 )}
                 <span className="team-name">{match.team1}</span>
@@ -168,28 +241,21 @@ export default function Home() {
 
               {/* Team 2 */}
               <button
-                className={`team-btn ${
-                  alreadySubmitted
-                    ? todaySelection.selectedTeam === match.team2
-                      ? 'selected'
-                      : 'dimmed'
-                    : pendingTeam === match.team2
-                    ? 'selected'
-                    : ''
-                } ${match.winnerTeam === match.team2 ? 'winner' : ''}`}
+                className={`team-btn ${getTeamClass(match.team2)} ${match.winnerTeam === match.team2 ? 'winner' : ''}`}
                 onClick={() => handleTeamClick(match.team2)}
-                disabled={alreadySubmitted || isTimeUp}
+                disabled={(alreadySubmitted && !isEditing) || isTimeUp}
               >
-                {(alreadySubmitted
-                  ? todaySelection.selectedTeam === match.team2
-                  : pendingTeam === match.team2) && (
+                {((isEditing || !alreadySubmitted) && pendingTeam === match.team2) && (
+                  <span className="team-check">✓</span>
+                )}
+                {alreadySubmitted && !isEditing && todaySelection.selectedTeam === match.team2 && (
                   <span className="team-check">✓</span>
                 )}
                 <span className="team-name">{match.team2}</span>
               </button>
             </div>
 
-            {/* Submit button */}
+            {/* Action buttons */}
             {!alreadySubmitted && !isTimeUp && (
               <button
                 className="btn-submit"
@@ -200,15 +266,36 @@ export default function Home() {
               </button>
             )}
 
+            {isEditing && (
+              <div className="edit-actions">
+                <button
+                  className="btn-submit"
+                  onClick={handleUpdate}
+                  disabled={!pendingTeam}
+                  style={{ flex: 1 }}
+                >
+                  {pendingTeam && pendingTeam !== todaySelection?.selectedTeam
+                    ? `✅ Confirm — ${pendingTeam}`
+                    : 'Select a different team'}
+                </button>
+                <button
+                  className="btn-cancel"
+                  onClick={handleCancelEdit}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
             {/* Result after submission */}
-            {alreadySubmitted && (
+            {alreadySubmitted && !isEditing && (
               <div style={{ marginTop: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontFamily: 'Rajdhani', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                   Your pick: <strong style={{ color: 'var(--text-primary)' }}>{todaySelection.selectedTeam}</strong>
                 </span>
                 {todaySelection.isCorrect === true  && <span className="result-badge badge-correct">✓ Correct</span>}
                 {todaySelection.isCorrect === false && <span className="result-badge badge-wrong">✗ Wrong</span>}
-                {todaySelection.isCorrect === null  && <span className="result-badge badge-pending">⏳ Awaiting Result</span>}
+                {todaySelection.isCorrect === null  && !isTimeUp && <span className="result-badge badge-pending">⏳ Awaiting Result</span>}
               </div>
             )}
 

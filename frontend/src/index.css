@@ -1345,3 +1345,69 @@ button {
   border: 1px solid rgba(245,166,35,0.2);
   color: var(--gold);
 }
+
+
+/* ─── EDIT MODE ─── */
+.banner-editing {
+  background: rgba(139,92,246,0.08);
+  border: 1px solid rgba(139,92,246,0.25);
+  color: #c4b5fd;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  align-items: stretch;
+}
+
+.btn-edit {
+  background: transparent;
+  border: 1px solid rgba(245,166,35,0.3);
+  color: var(--gold);
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: auto;
+}
+
+.btn-edit:hover {
+  background: rgba(245,166,35,0.1);
+  border-color: var(--gold);
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.btn-cancel:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(239,68,68,0.05);
+}

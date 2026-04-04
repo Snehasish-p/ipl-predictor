@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../api/api';
 import { useAuth } from '../context/AuthContext';
 
+
 export default function Matches() {
   const { user } = useAuth();
   const [matches, setMatches]       = useState([]);
@@ -171,48 +172,78 @@ export default function Matches() {
 }
 
 // ─── Match Card Component ───────────────────────────────────────────────────
+// Replace the entire MatchCard function with this updated version:
 function MatchCard({ match, status, isToday, pendingTeam, statusMsg, onTeamClick, onSubmit, formatDate }) {
-  const hasSelection   = !!match.userSelection;
-  const selectedTeam   = match.userSelection?.selectedTeam;
-  const isCorrect      = match.userSelection?.isCorrect;
-  const pending        = pendingTeam;
+  const [isEditing, setIsEditing]       = useState(false);
+  const [editTeam, setEditTeam]         = useState(null);
+  const [editStatus, setEditStatus]     = useState('');
+
+  const hasSelection  = !!match.userSelection;
+  const selectedTeam  = match.userSelection?.selectedTeam;
+  const isCorrect     = match.userSelection?.isCorrect;
+  const pending       = pendingTeam;
+  const now           = new Date();
+  const matchTime     = new Date(match.matchDate);
+  const canEdit       = hasSelection && now < matchTime && !match.isComplete;
+
+  const handleEditTeamClick = (team) => {
+    setEditTeam(prev => prev === team ? null : team);
+    setEditStatus('');
+  };
+
+  const handleEditSubmit = async () => {
+    if (!editTeam || editTeam === selectedTeam) {
+      setEditStatus('⚠ Pick a different team to update.');
+      return;
+    }
+    try {
+      await api.patch(`/selections/${match.id}`, { selectedTeam: editTeam });
+      setEditStatus(`✅ Updated to ${editTeam}!`);
+      setIsEditing(false);
+      setEditTeam(null);
+      // Refresh page data
+      window.location.reload();
+    } catch (err) {
+      setEditStatus(err.response?.data?.error || 'Update failed.');
+    }
+  };
+
+  const getTeamClass = (team) => {
+    if (isEditing) return editTeam === team ? 'selected' : '';
+    if (hasSelection) {
+      if (selectedTeam === team) return 'selected';
+      return 'dimmed';
+    }
+    return pending === team ? 'selected' : '';
+  };
 
   return (
     <div className={`match-list-card ${isToday ? 'match-today' : ''} ${status === 'completed' ? 'match-completed' : ''}`}>
 
-      {/* Card Header */}
+      {/* Header */}
       <div className="match-list-header">
         <div className="match-list-meta">
           {isToday && <span className="today-pill">TODAY</span>}
           <span className="match-list-date">{formatDate(match.matchDate)}</span>
           <span className="match-list-venue">📍 {match.venue}</span>
         </div>
-
-        {/* Result badge */}
         {status === 'completed' && match.winnerTeam && (
           <span className="winner-pill">🏆 {match.winnerTeam}</span>
         )}
-        {status === 'live' && (
-          <span className="live-pill">🔴 LIVE</span>
-        )}
+        {status === 'live' && <span className="live-pill">🔴 LIVE</span>}
       </div>
 
-      {/* Teams row */}
+      {/* Teams */}
       <div className="match-list-teams">
-        {/* Team 1 */}
         <button
-          className={`team-list-btn
-            ${status === 'upcoming' && pending === match.team1 ? 'selected' : ''}
-            ${hasSelection && selectedTeam === match.team1 ? 'selected' : ''}
-            ${hasSelection && selectedTeam !== match.team1 ? 'dimmed' : ''}
-            ${status === 'completed' && match.winnerTeam === match.team1 ? 'winner' : ''}
-            ${status === 'completed' && match.winnerTeam !== match.team1 ? 'loser' : ''}
-          `}
-          onClick={() => status === 'upcoming' && !hasSelection && onTeamClick(match.id, match.team1)}
-          disabled={hasSelection || status !== 'upcoming'}
+          className={`team-list-btn ${getTeamClass(match.team1)} ${match.winnerTeam === match.team1 ? 'winner' : ''}`}
+          onClick={() => {
+            if (isEditing) { handleEditTeamClick(match.team1); return; }
+            if (status === 'upcoming' && !hasSelection) onTeamClick(match.id, match.team1);
+          }}
+          disabled={(!isEditing && hasSelection) || status !== 'upcoming'}
         >
-          {((status === 'upcoming' && pending === match.team1) ||
-            (hasSelection && selectedTeam === match.team1)) && (
+          {((isEditing && editTeam === match.team1) || (!isEditing && (pending === match.team1 || (hasSelection && selectedTeam === match.team1)))) && (
             <span className="team-check">✓</span>
           )}
           <span className="team-name">{match.team1}</span>
@@ -220,58 +251,85 @@ function MatchCard({ match, status, isToday, pendingTeam, statusMsg, onTeamClick
 
         <span className="vs-label">VS</span>
 
-        {/* Team 2 */}
         <button
-          className={`team-list-btn
-            ${status === 'upcoming' && pending === match.team2 ? 'selected' : ''}
-            ${hasSelection && selectedTeam === match.team2 ? 'selected' : ''}
-            ${hasSelection && selectedTeam !== match.team2 ? 'dimmed' : ''}
-            ${status === 'completed' && match.winnerTeam === match.team2 ? 'winner' : ''}
-            ${status === 'completed' && match.winnerTeam !== match.team2 ? 'loser' : ''}
-          `}
-          onClick={() => status === 'upcoming' && !hasSelection && onTeamClick(match.id, match.team2)}
-          disabled={hasSelection || status !== 'upcoming'}
+          className={`team-list-btn ${getTeamClass(match.team2)} ${match.winnerTeam === match.team2 ? 'winner' : ''}`}
+          onClick={() => {
+            if (isEditing) { handleEditTeamClick(match.team2); return; }
+            if (status === 'upcoming' && !hasSelection) onTeamClick(match.id, match.team2);
+          }}
+          disabled={(!isEditing && hasSelection) || status !== 'upcoming'}
         >
-          {((status === 'upcoming' && pending === match.team2) ||
-            (hasSelection && selectedTeam === match.team2)) && (
+          {((isEditing && editTeam === match.team2) || (!isEditing && (pending === match.team2 || (hasSelection && selectedTeam === match.team2)))) && (
             <span className="team-check">✓</span>
           )}
           <span className="team-name">{match.team2}</span>
         </button>
       </div>
 
-      {/* Bottom row — submit or result */}
+      {/* Footer */}
       <div className="match-list-footer">
-        {/* Upcoming + not selected yet */}
+
+        {/* Not submitted yet */}
         {status === 'upcoming' && !hasSelection && (
-          <button
-            className="btn-submit-sm"
-            onClick={() => onSubmit(match)}
-            disabled={!pending}
-          >
+          <button className="btn-submit-sm" onClick={() => onSubmit(match)} disabled={!pending}>
             {pending ? `🔒 Lock in — ${pending}` : 'Select a team above'}
           </button>
         )}
 
-        {/* Upcoming + already selected */}
-        {status === 'upcoming' && hasSelection && (
+        {/* Submitted — can edit */}
+        {status === 'upcoming' && hasSelection && !isEditing && (
           <div className="selection-locked">
             <span>🔒 Your pick: <strong>{selectedTeam}</strong></span>
-            <span className="result-badge badge-pending">⏳ Awaiting Result</span>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <span className="result-badge badge-pending">⏳ Awaiting Result</span>
+              {canEdit && (
+                <button
+                  className="btn-edit"
+                  onClick={() => { setIsEditing(true); setEditTeam(selectedTeam); }}
+                >
+                  ✏️ Edit
+                </button>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Live — selection closed */}
+        {/* Edit mode */}
+        {status === 'upcoming' && hasSelection && isEditing && (
+          <div>
+            <p className="pick-hint" style={{ marginBottom: '0.5rem' }}>
+              Currently: <strong style={{ color: 'var(--gold)' }}>{selectedTeam}</strong> — pick a new team above
+            </p>
+            <div className="edit-actions">
+              <button
+                className="btn-submit-sm"
+                onClick={handleEditSubmit}
+                disabled={!editTeam || editTeam === selectedTeam}
+                style={{ flex: 1 }}
+              >
+                {editTeam && editTeam !== selectedTeam ? `✅ Confirm — ${editTeam}` : 'Select different team'}
+              </button>
+              <button
+                className="btn-cancel"
+                onClick={() => { setIsEditing(false); setEditTeam(null); setEditStatus(''); }}
+              >
+                Cancel
+              </button>
+            </div>
+            {editStatus && <p className={editStatus.startsWith('⚠') ? 'status-error' : 'status-success'} style={{ marginTop: '0.5rem' }}>{editStatus}</p>}
+          </div>
+        )}
+
+        {/* Live */}
         {status === 'live' && !hasSelection && (
           <div className="selection-locked">
-            <span style={{ color: 'var(--red)' }}>⛔ Selection closed — match started</span>
+            <span style={{ color: 'var(--red)' }}>⛔ Selection closed</span>
           </div>
         )}
-
         {status === 'live' && hasSelection && (
           <div className="selection-locked">
             <span>🔒 Your pick: <strong>{selectedTeam}</strong></span>
-            <span className="result-badge badge-pending">⏳ Match in progress</span>
+            <span className="result-badge badge-pending">⏳ In progress</span>
           </div>
         )}
 
@@ -284,17 +342,14 @@ function MatchCard({ match, status, isToday, pendingTeam, statusMsg, onTeamClick
             {isCorrect === null  && <span className="result-badge badge-pending">⏳ Pending</span>}
           </div>
         )}
-
         {status === 'completed' && !hasSelection && (
           <div className="selection-locked">
             <span style={{ color: 'var(--text-muted)' }}>You didn't pick for this match</span>
           </div>
         )}
 
-        {/* Status message */}
         {statusMsg && (
-          <p className={statusMsg.startsWith('⚠') ? 'status-error' : 'status-success'}
-             style={{ marginTop: '0.5rem' }}>
+          <p className={statusMsg.startsWith('⚠') ? 'status-error' : 'status-success'} style={{ marginTop: '0.5rem' }}>
             {statusMsg}
           </p>
         )}
